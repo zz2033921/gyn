@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkai.mapper.ProductMapper">
+    <resultMap id="BaseMapWithAdminProduct" type="com.linkai.dto.AdminProductDto">
+        <result column="pro_id" jdbcType="INTEGER" property="proId"/>
+        <result column="pro_title" jdbcType="VARCHAR" property="proTitle"/>
+        <result column="pro_price" property="proPrice" jdbcType="DECIMAL"/>
+        <result column="pro_number" property="proNumber" jdbcType="INTEGER"/>
+        <result column="pro_count" property="proCount" jdbcType="INTEGER"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="cat_desc" property="categoryDesc" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="BaseMapWithIndexProduct" type="com.linkai.dto.IndexProductDto">
+        <result column="pro_id" jdbcType="INTEGER" property="proId"/>
+        <result column="pro_title" jdbcType="VARCHAR" property="proTitle"/>
+        <result column="pro_brand" jdbcType="VARCHAR" property="proBrand"/>
+        <result column="pro_price" property="proPrice" jdbcType="DECIMAL"/>
+        <result column="pro_sale_price" property="proSalePrice" jdbcType="DECIMAL"/>
+        <result column="pro_number" property="proNumber" jdbcType="INTEGER"/>
+        <result column="pro_sale_percent" property="proSalePercent" jdbcType="INTEGER"/>
+        <result column="pro_is_hot" property="proIsHot" jdbcType="BIT"/>
+        <result column="pro_is_on_sale" property="proIsOnSale" jdbcType="BIT"/>
+        <result column="pro_count" property="proCount" jdbcType="INTEGER"/>
+        <result column="pro_is_new" property="proIsNew" jdbcType="BIT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <collection property="imgList" ofType="java.lang.String" javaType="java.util.List">
+            <result column="img_url"/>
+        </collection>
+    </resultMap>
+    <select id="listAdminProductDto" resultType="com.linkai.dto.AdminProductDto" resultMap="BaseMapWithAdminProduct">
+        select pt.pro_id,
+        pt.pro_title,
+         pt.pro_price,
+         pt.pro_count,
+         pt.pro_number,
+         pt.create_time,
+          pt.update_time,
+          c.cat_desc
+           from product as pt
+        left join category c on pt.cat_id = c.cat_id
+        where pt.deleted=0
+    </select>
+    <select id="listIndexProducts" resultMap="BaseMapWithIndexProduct">
+        select distinct  product.pro_id,
+         product.pro_title,
+          product.pro_price,
+          product.pro_brand,
+           product.pro_number,
+           product.pro_sale_percent,
+            product.pro_is_hot,
+            product.pro_is_on_sale,
+             product.pro_count,
+              product.pro_is_new,
+               product.pro_sale_price,
+                product.create_time,
+                 product.update_time,
+                 i.img_url
+        from product
+        left join img i on product.pro_id = i.pro_id
+        where product.deleted=0 and cat_id = #{catId}
+    </select>
+    <select id="selectOneProductByProId" resultType="com.linkai.dto.ProductDetailDto">
+        select product.pro_id,
+               product.pro_title,
+               product.pro_price,
+               product.pro_number,
+               product.pro_count,
+               product.pro_is_hot,
+               product.pro_is_new,
+               product.pro_brand,
+               product.pro_desc,
+               product.pro_sale_price
+        from product
+        where product.pro_id = #{proId}
+    </select>
+    <select id="listAllIndexProduct" resultMap="BaseMapWithIndexProduct">
+        select distinct  product.pro_id, product.pro_title, product.pro_price, product.pro_number,  product.pro_sale_percent,product.pro_is_hot, product.pro_count, product.pro_is_new, product.pro_sale_price, product.create_time, product.update_time,i.img_url
+        from product
+        left join img i on product.pro_id = i.pro_id
+        where product.deleted=0
+    </select>
+    <select id="listIndexOnSaleProducts" resultMap="BaseMapWithIndexProduct">
+        select distinct product.pro_id,
+                product.pro_title,
+                product.pro_brand,
+                product.pro_price,
+                product.pro_number,
+                product.pro_sale_percent,
+                product.pro_is_hot,
+                product.pro_is_on_sale,
+                product.pro_count,
+                product.pro_is_new,
+                product.pro_sale_price,
+                product.create_time,
+                product.update_time,
+                i.img_url
+        from product
+                 left join img i on product.pro_id = i.pro_id
+        where product.deleted = 0
+          and pro_is_on_sale=1
+    </select>
+    <update id="updateProCountByProId" parameterType="java.lang.Integer">
+        update product set pro_count = pro_count + 1 where pro_id = #{proId}
+    </update>
+    <select id="listPorpularProduct" resultMap="BaseMapWithIndexProduct">
+        select distinct  product.pro_id, product.pro_title, product.pro_price, product.pro_number,  product.pro_sale_percent,product.pro_is_hot, product.pro_count, product.pro_is_new, product.pro_sale_price, product.create_time, product.update_time,i.img_url
+        from product
+        left join img i on product.pro_id = i.pro_id
+        where product.deleted=0 and pro_count>=10 order by update_time limit 10;
+    </select>
+    <select id="listAllNewestProduct" resultMap="BaseMapWithIndexProduct">
+        select distinct product.pro_id,
+                product.pro_title,
+                product.pro_brand,
+                product.pro_price,
+                product.pro_number,
+                product.pro_sale_percent,
+                product.pro_is_hot,
+                product.pro_is_on_sale,
+                product.pro_count,
+                product.pro_is_new,
+                product.pro_sale_price,
+                product.create_time,
+                product.update_time,
+                i.img_url
+        from product
+                 left join img i on product.pro_id = i.pro_id
+        where product.deleted = 0
+          and pro_is_new = 1
+    </select>
+    <select id="listALlHotProducts" resultMap="BaseMapWithIndexProduct">
+        select distinct product.pro_id,
+                product.pro_title,
+                product.pro_brand,
+                product.pro_price,
+                product.pro_number,
+                product.pro_sale_percent,
+                product.pro_is_hot,
+                product.pro_is_on_sale,
+                product.pro_count,
+                product.pro_is_new,
+                product.pro_sale_price,
+                product.create_time,
+                product.update_time,
+                i.img_url
+        from product
+                 left join img i on product.pro_id = i.pro_id
+        where product.deleted = 0
+          and pro_is_hot = 1
+    </select>
+    <select id="listAllNameAndIdDto" resultType="com.linkai.dto.AdminProductIdAndNameDto">
+        select pro_id,pro_title from product where deleted=0;
+    </select>
+</mapper>

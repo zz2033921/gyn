@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkai.mapper.PushNewMapper">
+    <resultMap id="BaseMapWithIndexProduct" type="com.linkai.dto.IndexPushNewDto">
+        <result column="push_id" jdbcType="INTEGER" property="pushId"/>
+        <result column="push_title" jdbcType="VARCHAR" property="pushTitle"/>
+        <result column="push_desc" jdbcType="VARCHAR" property="pushDesc"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <collection property="imgs" ofType="java.lang.String" javaType="java.util.List">
+            <result column="img_url"/>
+        </collection>
+    </resultMap>
+    <select id="listAllPushNewProduct" resultType="com.linkai.dto.IndexPushNewDto" resultMap="BaseMapWithIndexProduct">
+        select pn.push_id,push_title,push_desc,pn.create_time,img_url
+        from push_new pn
+        left join push_img pi on pn.push_id = pi.push_id
+        left join img i on pi.img_id = i.img_id
+        where pn.deleted = 0;
+    </select>
+    <select id="getOnePushNewByPushId" parameterType="java.lang.Integer" resultType="com.linkai.dto.IndexPushNewDto">
+        select pn.push_id,push_title,push_desc,pn.create_time,img_url
+        from push_new pn
+        left join push_img pi on pn.push_id = pi.push_id
+        left join img i on pi.img_id = i.img_id
+        where pn.deleted = 0 and pn.push_id = #{pushId};
+    </select>
+</mapper>
